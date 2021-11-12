@@ -1,0 +1,11 @@
+version: '3.5'
+services:
+
+  postgresQuarkus:
+    image: postgres
+    environment:
+      POSTGRES_DB: "localDatabase"
+      POSTGRES_USER: "localUser"
+      POSTGRES_PASSWORD: "localPassword"
+    ports:
+      - "5434:5432"

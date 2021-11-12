@@ -1,0 +1,13 @@
+# Criar o projeto
+mvn io.quarkus.platform:quarkus-maven-plugin:2.4.1.Final:create
+
+#Rodar o projeto
+./mvnw compiler quarkus:dev
+
+./mvnw quarkus:list-extensions
+
+./mvnw quarkus:add-extensions -Dextensions="hibernate-validator"
+
+./mvnw quarkus:add-extensions -Dextensions="quarkus-jdbc-postgresql,quarkus-hibernate-orm,quarkus-hibernate-orm-panache,quarkus-resteasy-jsonb"
+
+./mvnw quarkus:add-extensions -Dextensions="jdbc-h2,jdbc-mysql"
