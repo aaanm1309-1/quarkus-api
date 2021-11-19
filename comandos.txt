@@ -18,3 +18,5 @@ mvn clean package -DskipTests
 
 
 docker build -f src/main/docker/Dockerfile.jvm -t quarkus-social:1.0 .
+
+docker run -i --rm -p 9000:8080 --name quarkus-social-container quarkus-social:1.0
