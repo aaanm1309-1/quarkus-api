@@ -11,3 +11,10 @@ mvn io.quarkus.platform:quarkus-maven-plugin:2.4.1.Final:create
 ./mvnw quarkus:add-extensions -Dextensions="quarkus-jdbc-postgresql,quarkus-hibernate-orm,quarkus-hibernate-orm-panache,quarkus-resteasy-jsonb"
 
 ./mvnw quarkus:add-extensions -Dextensions="jdbc-h2,jdbc-mysql"
+
+./mvnw quarkus:add-extension -Dextensions="smallrye-openapi"
+
+mvn clean package -DskipTests
+
+
+docker build -f src/main/docker/Dockerfile.jvm -t quarkus-social:1.0 .

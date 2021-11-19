@@ -2,6 +2,7 @@ package com.adrianomenezes.quarkussocial.rest;
 
 import com.adrianomenezes.quarkussocial.domain.model.Post;
 import com.adrianomenezes.quarkussocial.domain.model.User;
+import com.adrianomenezes.quarkussocial.domain.repository.FollowerRepository;
 import com.adrianomenezes.quarkussocial.domain.repository.PostRepository;
 import com.adrianomenezes.quarkussocial.domain.repository.UserRepository;
 import com.adrianomenezes.quarkussocial.rest.dto.CreatePostRequest;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class PostResource {
 
     private PostRepository postRepository;
+    private FollowerRepository followerRepository;
     private Validator validator;
     private UserRepository userRepository;
 
@@ -39,14 +41,16 @@ public class PostResource {
     public PostResource(
             UserRepository userRepository,
             PostRepository postRepository,
+            FollowerRepository followerRepository,
             Validator validator){
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.followerRepository = followerRepository;
         this.validator = validator;
     }
 
 
-    @POST
+    @PUT
     @Transactional
     public Response savePost(
             @PathParam("userId") Long userId,
@@ -63,7 +67,7 @@ public class PostResource {
 
         User user = userRepository.findById(userId);
         if (user == null) {
-            return Response.status(Response.Status.ACCEPTED).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         Post post = new Post();
@@ -79,28 +83,55 @@ public class PostResource {
     }
 
     @GET
-    public Response listPosts(@PathParam("userId") Long userId){
+    public Response listPosts(
+            @PathParam("userId") Long userId,
+            @HeaderParam("followerId") Long followerId){
         User user = userRepository.findById(userId);
         if (user == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        PanacheQuery<Post> query =
-                postRepository
-                        .find("user",
-                                Sort.by("dateTime",
-                                        Sort.Direction.Descending),
-                                user);
+        if (followerId == null) {
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("You forgot the header followerId")
+                    .build();
+        }
+
+
+        User follower = userRepository.findById(followerId);
+        if (follower == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Follower not found").build();
+        }
+
+        boolean follows = followerRepository.follows(follower, user);
+
+        if (follows) {
+            PanacheQuery<Post> query =
+                    postRepository
+                            .find("user",
+                                    Sort.by("dateTime",
+                                            Sort.Direction.Descending),
+                                    user);
 //                postRepository.find(
 //                        "select post from Post where User = :user",user);
 
-        var list = query
-                .list()
-                .stream()
+            var list = query
+                    .list()
+                    .stream()
 //                .map(post -> PostResponse.fromEntity(post))
-                .map(PostResponse::fromEntity)
-                .collect(Collectors.toList());
+                    .map(PostResponse::fromEntity)
+                    .collect(Collectors.toList());
 
-        return Response.ok(list).build();
+            return Response.ok().entity(list).build();
+
+        }
+
+        return Response.status(Response.Status.FORBIDDEN).entity("You cant see these posts.").build();
+
+
     }
+
+
+
 }

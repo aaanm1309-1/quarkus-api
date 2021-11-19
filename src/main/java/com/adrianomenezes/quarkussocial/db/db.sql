@@ -2,7 +2,7 @@ create table USERS (
 	id bigserial  not null primary key,
 	name varchar(100) not null,
 	age integer not null
-)
+);
 
 
 create table POSTS (
@@ -10,5 +10,12 @@ create table POSTS (
 	post_text varchar(1000) not null,
 	dateTime timestamp not null,
 	userId bigint not null references USERS(id)
-)
+);
+
+create table FOLLOWERS (
+	id bigserial  not null primary key,
+	userId bigint not null references USERS(id),
+	followerId bigint not null references USERS(id)
+);
+
 
